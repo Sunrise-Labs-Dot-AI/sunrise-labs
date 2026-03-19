@@ -54,6 +54,32 @@
       opacity: 0;
     }
 
+    .contact {
+      margin-top: 2rem;
+      pointer-events: auto;
+      animation: fadeIn 4s ease-out 1s forwards;
+      opacity: 0;
+    }
+
+    .contact a {
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: lowercase;
+      color: rgba(255, 255, 255, 0.35);
+      text-decoration: none;
+      padding: 0.5rem 1.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+      transition: all 0.4s ease;
+    }
+
+    .contact a:hover {
+      color: rgba(255, 255, 255, 0.7);
+      border-color: rgba(255, 200, 100, 0.25);
+      text-shadow: 0 0 20px rgba(255, 140, 50, 0.2);
+    }
+
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(8px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -64,6 +90,9 @@
   <canvas id="c"></canvas>
   <div class="content">
     <div class="wordmark">Sunrise Labs</div>
+    <div class="contact">
+      <a href="mailto:hello@sunriselabs.com">get in touch</a>
+    </div>
   </div>
 
   <script>
