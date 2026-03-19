@@ -1,0 +1,115 @@
+name: Execute Handoff
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch containing the handoff file'
+        required: true
+      handoff_file:
+        description: 'Path to handoff file'
+        required: true
+      review_feedback:
+        description: 'Feedback from previous review (optional)'
+        required: false
+        default: ''
+
+concurrency:
+  group: execute-handoff-${{ github.event.inputs.branch || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - name: Verify handoff file exists
+        run: |
+          if [ ! -f "${{ github.event.inputs.handoff_file }}" ]; then
+            echo "Handoff file not found: ${{ github.event.inputs.handoff_file }}"
+            exit 1
+          fi
+          echo "Executing handoff: ${{ github.event.inputs.handoff_file }}"
+          cat "${{ github.event.inputs.handoff_file }}"
+
+      - name: Parse budget from handoff
+        id: budget
+        run: |
+          BUDGET=$(grep -i 'max budget' "${{ github.event.inputs.handoff_file }}" | head -1 | grep -oP '\$\K[0-9]+(\.[0-9]+)?' || echo "3")
+          echo "amount=$BUDGET" >> $GITHUB_OUTPUT
+
+      - name: Configure git
+        run: |
+          git config user.name "claude[bot]"
+          git config user.email "209825114+claude[bot]@users.noreply.github.com"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Execute handoff with Claude Code
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        timeout-minutes: 10
+        run: |
+          REVIEW_FEEDBACK="${{ github.event.inputs.review_feedback }}"
+
+          PROMPT="You are executing a handoff file for the sunrise-labs project.
+          This is a static website (single index.html). There is no build system, no npm, no tests.
+
+          Read and execute the handoff file at \`${{ github.event.inputs.handoff_file }}\`.
+
+          Follow the steps exactly. Step 0 (branch setup) is already done.
+          After making changes, commit and push to this branch.
+          Then open a PR against main using gh pr create."
+
+          if [ -n "$REVIEW_FEEDBACK" ]; then
+            PROMPT="$PROMPT
+
+          RETRY CONTEXT: Fix the following issues from a previous attempt:
+          $REVIEW_FEEDBACK"
+          fi
+
+          echo "$PROMPT" | claude -p - \
+            --dangerously-skip-permissions \
+            --model claude-sonnet-4-5-20250514 \
+            --max-budget-usd ${{ steps.budget.outputs.amount }} \
+            --output-format json \
+            2>&1 | tee /tmp/claude-output.log
+
+      - name: Ensure PR exists (fallback)
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.event.inputs.branch }}"
+          PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
+          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ]; then
+            echo "PR #$PR_NUMBER already exists"
+            exit 0
+          fi
+          MERGED_COUNT=$(gh pr list --head "$BRANCH" --state merged --json number --jq 'length' 2>/dev/null || echo "0")
+          if [ "$MERGED_COUNT" -gt 0 ]; then
+            echo "PR already merged for $BRANCH"
+            exit 0
+          fi
+          COMMITS_AHEAD=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo "0")
+          if [ "$COMMITS_AHEAD" -le 1 ]; then
+            echo "::warning::No implementation commits found"
+            exit 0
+          fi
+          LAST_COMMIT=$(git log -1 --format="%s")
+          gh pr create --head "$BRANCH" --base main --title "$LAST_COMMIT" \
+            --body "Automated PR from execute-handoff workflow.
+
+          **Handoff:** \`${{ github.event.inputs.handoff_file }}\`"
