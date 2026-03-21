@@ -198,9 +198,7 @@
     const scroller = document.getElementById('scroller');
 
     let targetTime = 0;
-    let currentTime = 0;
-    let rafId = null;
-    const LERP = 0.08; // smoothing factor: lower = smoother/slower
+    let seeking = false;
 
     // Show first frame on load
     video.addEventListener('loadedmetadata', () => {
@@ -215,24 +213,18 @@
       }).catch(() => {});
     }, { once: true });
 
-    // Smooth interpolation loop: lerps currentTime toward targetTime
-    function smoothSeek() {
-      const diff = targetTime - currentTime;
-
-      // Stop animating once close enough
-      if (Math.abs(diff) < 0.005) {
-        currentTime = targetTime;
-        video.currentTime = currentTime;
-        rafId = null;
-        return;
+    // Gate seeks: only issue the next seek once the browser finishes the current one.
+    // This prevents piling up decode operations that cause stutter.
+    video.addEventListener('seeked', () => {
+      seeking = false;
+      // If the target moved while we were seeking, seek again to the latest target
+      if (Math.abs(video.currentTime - targetTime) > 0.02) {
+        seeking = true;
+        video.currentTime = targetTime;
       }
+    });
 
-      currentTime += diff * LERP;
-      video.currentTime = currentTime;
-      rafId = requestAnimationFrame(smoothSeek);
-    }
-
-    // Throttle: only compute scroll target, let RAF handle seeking
+    // Scroll handler just updates targetTime and kicks one seek
     scroller.addEventListener('scroll', () => {
       const duration = video.duration;
       if (!duration || isNaN(duration)) return;
@@ -242,10 +234,9 @@
       const progress = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
       targetTime = progress * duration;
 
-      // Kick off the smooth seek loop if not already running
-      if (!rafId) {
-        currentTime = video.currentTime;
-        rafId = requestAnimationFrame(smoothSeek);
+      if (!seeking) {
+        seeking = true;
+        video.currentTime = targetTime;
       }
     }, { passive: true });
   </script>
