@@ -169,7 +169,7 @@
 </head>
 <body>
   <div class="video-bg">
-    <video id="vid" autoplay loop muted playsinline preload="auto">
+    <video id="vid" muted playsinline preload="auto">
       <source src="sunrise.mp4" type="video/mp4">
     </video>
   </div>
@@ -196,39 +196,29 @@
   <script>
     const video = document.getElementById('vid');
     const scroller = document.getElementById('scroller');
-    let isScrollScrubbing = false;
-    let scrollTimeout = null;
 
-    // Slow down native playback for a subtle creep through the sunrise
+    // Show first frame on load, then stay paused
+    video.addEventListener('loadedmetadata', () => {
+      video.currentTime = 0;
+    });
+
+    // Also try to force a frame display by briefly playing then pausing
     video.addEventListener('canplay', () => {
-      video.playbackRate = 0.1;
+      video.play().then(() => {
+        video.pause();
+        video.currentTime = 0;
+      }).catch(() => {});
     }, { once: true });
 
-    // Also try setting rate immediately in case canplay already fired
-    video.playbackRate = 0.1;
-
-    // Scroll-scrub: pause video and map scroll position to video time
+    // Scroll-scrub: map scroll position directly to video time
     scroller.addEventListener('scroll', () => {
       const duration = video.duration;
       if (!duration || isNaN(duration)) return;
-
-      if (!isScrollScrubbing) {
-        isScrollScrubbing = true;
-        video.pause();
-      }
 
       const scrollTop = scroller.scrollTop;
       const maxScroll = scroller.scrollHeight - scroller.clientHeight;
       const progress = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
       video.currentTime = progress * duration;
-
-      // Resume slow playback after 2s of no scrolling
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        isScrollScrubbing = false;
-        video.playbackRate = 0.1;
-        video.play().catch(() => {});
-      }, 2000);
     }, { passive: true });
   </script>
 </body>
