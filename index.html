@@ -24,7 +24,6 @@
       background: #0a0a0f;
     }
 
-    /* Scrollable layer: tall enough to give scroll room for scrubbing */
     .scroll-container {
       position: fixed;
       top: 0;
@@ -38,7 +37,6 @@
     }
 
     .scroll-spacer {
-      /* 6x viewport height gives generous scrub range */
       height: 600vh;
       pointer-events: none;
     }
@@ -130,7 +128,6 @@
       stroke-linejoin: round;
     }
 
-    /* Subtle scroll hint that fades out */
     .scroll-hint {
       position: fixed;
       bottom: 88px;
@@ -166,14 +163,13 @@
       50% { transform: translateY(4px); opacity: 0.7; }
     }
 
-    /* Hide scrollbar but keep scrollable */
     .scroll-container::-webkit-scrollbar { display: none; }
     .scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body>
   <div class="video-bg">
-    <video id="vid" muted playsinline preload="auto" poster="">
+    <video id="vid" autoplay loop muted playsinline preload="auto">
       <source src="sunrise.mp4" type="video/mp4">
     </video>
   </div>
@@ -193,7 +189,6 @@
 
   <div class="scroll-hint"><span></span></div>
 
-  <!-- Scroll container for scrub interaction -->
   <div class="scroll-container" id="scroller">
     <div class="scroll-spacer"></div>
   </div>
@@ -201,81 +196,40 @@
   <script>
     const video = document.getElementById('vid');
     const scroller = document.getElementById('scroller');
-    let duration = 0;
     let isScrollScrubbing = false;
-    let autoPlayRAF = null;
-    let autoPlayRate = 0.08; // slow auto-advance: ~8s video over ~100s
-    let lastScrollTime = 0;
     let scrollTimeout = null;
 
-    // Wait for video metadata
-    video.addEventListener('loadedmetadata', () => {
-      duration = video.duration;
-      // Start at beginning
-      video.currentTime = 0;
-      // Begin slow auto-play
-      startAutoPlay();
-    });
+    // Slow down native playback for a subtle creep through the sunrise
+    video.addEventListener('canplay', () => {
+      video.playbackRate = 0.1;
+    }, { once: true });
 
-    // Slow auto-advance: creep through the sunrise
-    function startAutoPlay() {
-      if (autoPlayRAF) return;
-      let lastTime = performance.now();
+    // Also try setting rate immediately in case canplay already fired
+    video.playbackRate = 0.1;
 
-      function tick(now) {
-        if (!isScrollScrubbing && duration > 0) {
-          const dt = (now - lastTime) / 1000;
-          const newTime = video.currentTime + dt * autoPlayRate;
-          // Loop back to start if we reach the end
-          video.currentTime = newTime >= duration ? 0 : newTime;
-        }
-        lastTime = now;
-        autoPlayRAF = requestAnimationFrame(tick);
-      }
-
-      autoPlayRAF = requestAnimationFrame(tick);
-    }
-
-    // Scroll-scrub: map scroll position to video time
+    // Scroll-scrub: pause video and map scroll position to video time
     scroller.addEventListener('scroll', () => {
-      if (duration <= 0) return;
+      const duration = video.duration;
+      if (!duration || isNaN(duration)) return;
 
-      isScrollScrubbing = true;
-      lastScrollTime = Date.now();
+      if (!isScrollScrubbing) {
+        isScrollScrubbing = true;
+        video.pause();
+      }
 
       const scrollTop = scroller.scrollTop;
       const maxScroll = scroller.scrollHeight - scroller.clientHeight;
       const progress = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
-
       video.currentTime = progress * duration;
 
-      // Resume auto-play after 2s of no scrolling
+      // Resume slow playback after 2s of no scrolling
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         isScrollScrubbing = false;
+        video.playbackRate = 0.1;
+        video.play().catch(() => {});
       }, 2000);
     }, { passive: true });
-
-    // Touch handling: ensure smooth scrub on mobile
-    let touchStartY = 0;
-    let touchStartScroll = 0;
-
-    scroller.addEventListener('touchstart', (e) => {
-      touchStartY = e.touches[0].clientY;
-      touchStartScroll = scroller.scrollTop;
-    }, { passive: true });
-
-    // Prevent bounce/overscroll on iOS
-    document.body.addEventListener('touchmove', (e) => {
-      // Allow scrolling within our container
-    }, { passive: true });
-
-    // Fallback: if video doesn't load metadata quickly, try playing
-    setTimeout(() => {
-      if (duration === 0) {
-        video.play().catch(() => {});
-      }
-    }, 1000);
   </script>
 </body>
 </html>
