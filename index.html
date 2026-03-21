@@ -197,12 +197,17 @@
     const video = document.getElementById('vid');
     const scroller = document.getElementById('scroller');
 
-    // Show first frame on load, then stay paused
+    let targetTime = 0;
+    let currentTime = 0;
+    let rafId = null;
+    const LERP = 0.08; // smoothing factor: lower = smoother/slower
+
+    // Show first frame on load
     video.addEventListener('loadedmetadata', () => {
       video.currentTime = 0;
     });
 
-    // Also try to force a frame display by briefly playing then pausing
+    // Force first frame display
     video.addEventListener('canplay', () => {
       video.play().then(() => {
         video.pause();
@@ -210,7 +215,24 @@
       }).catch(() => {});
     }, { once: true });
 
-    // Scroll-scrub: map scroll position directly to video time
+    // Smooth interpolation loop: lerps currentTime toward targetTime
+    function smoothSeek() {
+      const diff = targetTime - currentTime;
+
+      // Stop animating once close enough
+      if (Math.abs(diff) < 0.005) {
+        currentTime = targetTime;
+        video.currentTime = currentTime;
+        rafId = null;
+        return;
+      }
+
+      currentTime += diff * LERP;
+      video.currentTime = currentTime;
+      rafId = requestAnimationFrame(smoothSeek);
+    }
+
+    // Throttle: only compute scroll target, let RAF handle seeking
     scroller.addEventListener('scroll', () => {
       const duration = video.duration;
       if (!duration || isNaN(duration)) return;
@@ -218,7 +240,13 @@
       const scrollTop = scroller.scrollTop;
       const maxScroll = scroller.scrollHeight - scroller.clientHeight;
       const progress = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
-      video.currentTime = progress * duration;
+      targetTime = progress * duration;
+
+      // Kick off the smooth seek loop if not already running
+      if (!rafId) {
+        currentTime = video.currentTime;
+        rafId = requestAnimationFrame(smoothSeek);
+      }
     }, { passive: true });
   </script>
 </body>
