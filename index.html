@@ -2,34 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sunrise Labs</title>
   <meta name="description" content="Sunrise Labs">
   <meta property="og:title" content="Sunrise Labs">
   <meta property="og:description" content="Sunrise Labs">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sunriselabs.ai">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9728;</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      width: 100vw;
-      height: 100vh;
+    html, body {
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-family: 'Cormorant Garamond', Georgia, serif;
       background: #0a0a0f;
     }
 
-    canvas {
+    /* Scrollable layer: tall enough to give scroll room for scrubbing */
+    .scroll-container {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      z-index: 1;
+    }
+
+    .scroll-spacer {
+      /* 6x viewport height gives generous scrub range */
+      height: 600vh;
+      pointer-events: none;
+    }
+
+    .video-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      background: #0a0a0f;
+    }
+
+    .video-bg video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
     }
 
     .content {
@@ -47,9 +81,9 @@
     }
 
     .wordmark {
-      font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
       font-weight: 300;
-      letter-spacing: 0.3em;
+      letter-spacing: 0.35em;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.88);
       text-shadow: 0 0 80px rgba(255, 140, 50, 0.3);
@@ -57,45 +91,63 @@
       opacity: 0;
     }
 
-    .mail-btn {
+    .mail-icon {
       position: fixed;
-      bottom: 2rem;
+      bottom: 32px;
       left: 50%;
-      transform: translateX(-50%) translateY(8px);
+      transform: translateX(-50%);
       z-index: 20;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      background: rgba(255, 255, 255, 0.04);
+      pointer-events: auto;
+    }
+
+    .mail-icon a {
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.06);
+      transition: all 0.3s ease;
       text-decoration: none;
-      transition: all 0.4s ease;
-      animation: fadeInCenter 4s ease-out 1.5s forwards;
+      animation: fadeIn 4s ease-out forwards;
       opacity: 0;
     }
 
-    .mail-btn:hover {
-      border-color: rgba(255, 255, 255, 0.35);
-      background: rgba(255, 255, 255, 0.08);
+    .mail-icon a:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.12);
     }
 
-    .mail-btn svg {
+    .mail-icon a svg {
       width: 16px;
       height: 16px;
       fill: none;
-      stroke: rgba(255, 255, 255, 0.45);
+      stroke: rgba(255, 255, 255, 0.7);
       stroke-width: 1.5;
       stroke-linecap: round;
       stroke-linejoin: round;
-      transition: stroke 0.4s ease;
     }
 
-    .mail-btn:hover svg {
-      stroke: rgba(255, 255, 255, 0.75);
+    /* Subtle scroll hint that fades out */
+    .scroll-hint {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0;
+      animation: hintAppear 6s ease-out forwards;
+    }
+
+    .scroll-hint span {
+      display: block;
+      width: 1px;
+      height: 20px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.2), rgba(255,255,255,0));
+      animation: scrollPulse 2s ease-in-out infinite;
     }
 
     @keyframes fadeIn {
@@ -103,132 +155,127 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes fadeInCenter {
-      0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
-      100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @keyframes hintAppear {
+      0%, 60% { opacity: 0; }
+      75% { opacity: 1; }
+      100% { opacity: 0; }
     }
+
+    @keyframes scrollPulse {
+      0%, 100% { transform: translateY(-4px); opacity: 0.3; }
+      50% { transform: translateY(4px); opacity: 0.7; }
+    }
+
+    /* Hide scrollbar but keep scrollable */
+    .scroll-container::-webkit-scrollbar { display: none; }
+    .scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body>
-  <canvas id="c"></canvas>
+  <div class="video-bg">
+    <video id="vid" muted playsinline preload="auto" poster="">
+      <source src="sunrise.mp4" type="video/mp4">
+    </video>
+  </div>
+
   <div class="content">
     <div class="wordmark">Sunrise Labs</div>
   </div>
-  <a href="mailto:hello@sunriselabs.com" class="mail-btn" aria-label="Get in touch">
-    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-  </a>
+
+  <div class="mail-icon">
+    <a href="mailto:hello@sunriselabs.com" aria-label="Email us">
+      <svg viewBox="0 0 24 24">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <polyline points="2,4 12,13 22,4"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="scroll-hint"><span></span></div>
+
+  <!-- Scroll container for scrub interaction -->
+  <div class="scroll-container" id="scroller">
+    <div class="scroll-spacer"></div>
+  </div>
 
   <script>
-    const canvas = document.getElementById('c');
-    const ctx = canvas.getContext('2d');
-    let w, h, time = 0;
+    const video = document.getElementById('vid');
+    const scroller = document.getElementById('scroller');
+    let duration = 0;
+    let isScrollScrubbing = false;
+    let autoPlayRAF = null;
+    let autoPlayRate = 0.08; // slow auto-advance: ~8s video over ~100s
+    let lastScrollTime = 0;
+    let scrollTimeout = null;
 
-    function resize() {
-      const dpr = window.devicePixelRatio || 1;
-      w = canvas.width = window.innerWidth * dpr;
-      h = canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + 'px';
-      canvas.style.height = window.innerHeight + 'px';
+    // Wait for video metadata
+    video.addEventListener('loadedmetadata', () => {
+      duration = video.duration;
+      // Start at beginning
+      video.currentTime = 0;
+      // Begin slow auto-play
+      startAutoPlay();
+    });
+
+    // Slow auto-advance: creep through the sunrise
+    function startAutoPlay() {
+      if (autoPlayRAF) return;
+      let lastTime = performance.now();
+
+      function tick(now) {
+        if (!isScrollScrubbing && duration > 0) {
+          const dt = (now - lastTime) / 1000;
+          const newTime = video.currentTime + dt * autoPlayRate;
+          // Loop back to start if we reach the end
+          video.currentTime = newTime >= duration ? 0 : newTime;
+        }
+        lastTime = now;
+        autoPlayRAF = requestAnimationFrame(tick);
+      }
+
+      autoPlayRAF = requestAnimationFrame(tick);
     }
 
-    window.addEventListener('resize', resize);
-    resize();
+    // Scroll-scrub: map scroll position to video time
+    scroller.addEventListener('scroll', () => {
+      if (duration <= 0) return;
 
-    function draw() {
-      time += 0.003;
+      isScrollScrubbing = true;
+      lastScrollTime = Date.now();
 
-      const horizonY = h * 0.62;
+      const scrollTop = scroller.scrollTop;
+      const maxScroll = scroller.scrollHeight - scroller.clientHeight;
+      const progress = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
 
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
-      skyGrad.addColorStop(0, '#05050f');
-      skyGrad.addColorStop(0.25, '#0a0a1e');
-      skyGrad.addColorStop(0.45, '#1a0a2e');
-      skyGrad.addColorStop(0.55, '#3d1233');
-      skyGrad.addColorStop(0.62, '#8b2a1a');
-      skyGrad.addColorStop(0.68, '#d4622a');
-      skyGrad.addColorStop(0.73, '#e8943a');
-      skyGrad.addColorStop(0.78, '#f0c040');
-      skyGrad.addColorStop(0.85, '#e8943a');
-      skyGrad.addColorStop(1.0, '#1a0a0a');
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, w, h);
+      video.currentTime = progress * duration;
 
-      const sunX = w * 0.5;
-      const sunY = horizonY + Math.sin(time * 0.5) * h * 0.01;
-      const sunR = w * 0.35;
+      // Resume auto-play after 2s of no scrolling
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrollScrubbing = false;
+      }, 2000);
+    }, { passive: true });
 
-      const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR);
-      sunGlow.addColorStop(0, 'rgba(255, 220, 120, 0.9)');
-      sunGlow.addColorStop(0.08, 'rgba(255, 180, 60, 0.7)');
-      sunGlow.addColorStop(0.2, 'rgba(255, 120, 40, 0.4)');
-      sunGlow.addColorStop(0.5, 'rgba(200, 60, 30, 0.15)');
-      sunGlow.addColorStop(1, 'rgba(100, 20, 10, 0)');
-      ctx.fillStyle = sunGlow;
-      ctx.fillRect(0, 0, w, h);
+    // Touch handling: ensure smooth scrub on mobile
+    let touchStartY = 0;
+    let touchStartScroll = 0;
 
-      for (let i = 0; i < 5; i++) {
-        const bandY = horizonY - h * 0.02 + i * h * 0.015;
-        const bandAlpha = 0.06 - i * 0.01;
-        const offset = Math.sin(time + i * 0.7) * w * 0.02;
-        ctx.fillStyle = `rgba(255, ${160 + i * 15}, ${60 + i * 20}, ${bandAlpha})`;
-        ctx.fillRect(0, bandY + offset, w, h * 0.008);
+    scroller.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchStartScroll = scroller.scrollTop;
+    }, { passive: true });
+
+    // Prevent bounce/overscroll on iOS
+    document.body.addEventListener('touchmove', (e) => {
+      // Allow scrolling within our container
+    }, { passive: true });
+
+    // Fallback: if video doesn't load metadata quickly, try playing
+    setTimeout(() => {
+      if (duration === 0) {
+        video.play().catch(() => {});
       }
-
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2 + time * 0.2;
-        const len = w * (0.15 + Math.sin(time * 2 + i) * 0.05);
-        const streakAlpha = 0.03 + Math.sin(time * 1.5 + i * 0.8) * 0.02;
-
-        ctx.beginPath();
-        ctx.moveTo(sunX, sunY);
-        ctx.lineTo(
-          sunX + Math.cos(angle) * len,
-          sunY + Math.sin(angle) * len * 0.15
-        );
-        ctx.strokeStyle = `rgba(255, 200, 100, ${streakAlpha})`;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      for (let i = 0; i < 40; i++) {
-        const seed = i * 127.1;
-        const px = ((Math.sin(seed) * 43758.5453) % 1 + 1) % 1 * w;
-        const py = ((Math.sin(seed * 1.3) * 23421.631) % 1 + 1) % 1 * h * 0.8 + h * 0.1;
-        const drift = Math.sin(time * 0.5 + seed) * 20;
-        const rise = Math.cos(time * 0.3 + seed * 0.7) * 10;
-        const size = 1 + ((Math.sin(seed * 2.1) + 1) * 0.5) * 2;
-        const alpha = 0.1 + Math.sin(time + seed) * 0.08;
-
-        ctx.beginPath();
-        ctx.arc(px + drift, py + rise, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, ${180 + Math.floor(Math.sin(seed) * 40)}, ${100 + Math.floor(Math.sin(seed * 1.5) * 60)}, ${alpha})`;
-        ctx.fill();
-      }
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalCompositeOperation = 'overlay';
-      for (let y = 0; y < h; y += 4) {
-        ctx.fillStyle = `rgba(0, 0, 0, 0.03)`;
-        ctx.fillRect(0, y, w, 1);
-      }
-      ctx.restore();
-
-      const vigGrad = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.75);
-      vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
-      vigGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
-      ctx.fillStyle = vigGrad;
-      ctx.fillRect(0, 0, w, h);
-
-      requestAnimationFrame(draw);
-    }
-
-    draw();
+    }, 1000);
   </script>
 </body>
 </html>
