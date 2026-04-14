@@ -16,12 +16,27 @@ function formatTime(d: Date) {
   });
 }
 
+function formatDate(d: Date) {
+  // ISO date in SF time, e.g. "2026-04-14"
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "America/Los_Angeles",
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
 export function DawnCoordinate() {
   const [sunrise, setSunrise] = useState("06:35");
+  const [date, setDate] = useState("");
 
   useEffect(() => {
-    const times = SunCalc.getTimes(new Date(), LAT, LNG);
+    const now = new Date();
+    const times = SunCalc.getTimes(now, LAT, LNG);
     setSunrise(formatTime(times.sunrise));
+    setDate(formatDate(now));
   }, []);
 
   return (
@@ -29,8 +44,8 @@ export function DawnCoordinate() {
       aria-hidden="true"
       className="pointer-events-none fixed left-6 top-6 z-20 hidden select-none font-mono text-[10px] leading-[1.6] tracking-[0.1em] text-[var(--color-fog)] md:block"
     >
-      <div>{sunrise}</div>
-      <div>sunrise, sf</div>
+      <div>{date}</div>
+      <div>{sunrise} sunrise, sf</div>
     </div>
   );
 }
