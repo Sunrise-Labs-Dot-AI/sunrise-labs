@@ -8,22 +8,61 @@ export function BackgroundVideo() {
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
-    // Some browsers (and React SSR hydration timing) skip the declarative
-    // autoplay — explicitly kick playback after mount. Muted + playsInline
-    // keeps this inside autoplay policy.
-    v.muted = true;
-    const tryPlay = () => {
-      v.play().catch(() => {
-        // Autoplay blocked. Leave the poster/first frame up; user can still
-        // scroll, and the reduced-motion fallback already covers a11y.
-      });
+
+    let targetTime = 0;
+    let seeking = false;
+
+    // Prime the video: play briefly so the first frame decodes, then pause
+    // at t=0. Without this, Safari/iOS show nothing until the first scroll.
+    const prime = () => {
+      v.play()
+        .then(() => {
+          v.pause();
+          v.currentTime = 0;
+        })
+        .catch(() => {
+          /* autoplay blocked — first frame may be missing until scroll */
+        });
     };
-    if (v.readyState >= 2) {
-      tryPlay();
-    } else {
-      v.addEventListener("loadeddata", tryPlay, { once: true });
-    }
-    return () => v.removeEventListener("loadeddata", tryPlay);
+    if (v.readyState >= 2) prime();
+    else v.addEventListener("canplay", prime, { once: true });
+
+    // Gate seeks behind the `seeked` event to prevent decode pile-up. This is
+    // the anti-jitter trick from the legacy implementation: only one seek is
+    // in flight at a time; if scroll moved on while we were seeking, kick the
+    // next seek from inside the seeked handler.
+    const onSeeked = () => {
+      seeking = false;
+      if (Math.abs(v.currentTime - targetTime) > 0.02) {
+        seeking = true;
+        v.currentTime = targetTime;
+      }
+    };
+    v.addEventListener("seeked", onSeeked);
+
+    const onScroll = () => {
+      const duration = v.duration;
+      if (!duration || Number.isNaN(duration)) return;
+
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
+      targetTime = progress * duration;
+
+      if (!seeking) {
+        seeking = true;
+        v.currentTime = targetTime;
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // Fire once so the video reflects current scroll position on mount /
+    // back-nav (e.g. when bfcache restores a mid-page scroll state).
+    onScroll();
+
+    return () => {
+      v.removeEventListener("seeked", onSeeked);
+      v.removeEventListener("canplay", prime);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   return (
@@ -31,9 +70,7 @@ export function BackgroundVideo() {
       <video
         ref={ref}
         className="absolute left-1/2 top-1/2 h-auto min-h-full w-auto min-w-full -translate-x-1/2 -translate-y-1/2 object-cover [filter:brightness(0.85)_saturate(1.1)] motion-reduce:hidden"
-        autoPlay
         muted
-        loop
         playsInline
         preload="auto"
       >
