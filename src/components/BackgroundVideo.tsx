@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
-export function BackgroundVideo() {
+type Props = {
+  /**
+   * If provided, scroll progress is computed relative to this element's
+   * position in the viewport (sticky-parent scroll range). If absent,
+   * progress is computed against document scroll.
+   */
+  scrollTargetRef?: RefObject<HTMLElement | null>;
+};
+
+export function BackgroundVideo({ scrollTargetRef }: Props = {}) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -27,10 +36,7 @@ export function BackgroundVideo() {
     if (v.readyState >= 2) prime();
     else v.addEventListener("canplay", prime, { once: true });
 
-    // Gate seeks behind the `seeked` event to prevent decode pile-up. This is
-    // the anti-jitter trick from the legacy implementation: only one seek is
-    // in flight at a time; if scroll moved on while we were seeking, kick the
-    // next seek from inside the seeked handler.
+    // Gate seeks behind the `seeked` event to prevent decode pile-up.
     const onSeeked = () => {
       seeking = false;
       if (Math.abs(v.currentTime - targetTime) > 0.02) {
@@ -40,33 +46,46 @@ export function BackgroundVideo() {
     };
     v.addEventListener("seeked", onSeeked);
 
+    const computeProgress = (): number => {
+      const target = scrollTargetRef?.current;
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        const range = target.offsetHeight - window.innerHeight;
+        if (range <= 0) return 0;
+        const scrolled = -rect.top;
+        return Math.min(Math.max(scrolled / range, 0), 1);
+      }
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      return max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
+    };
+
     const onScroll = () => {
       const duration = v.duration;
       if (!duration || Number.isNaN(duration)) return;
-
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
-      targetTime = progress * duration;
-
+      targetTime = computeProgress() * duration;
       if (!seeking) {
         seeking = true;
         v.currentTime = targetTime;
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    // Fire once so the video reflects current scroll position on mount /
-    // back-nav (e.g. when bfcache restores a mid-page scroll state).
+    // Fire once so the video reflects current scroll position on mount.
     onScroll();
+    // Also fire once duration becomes known.
+    v.addEventListener("loadedmetadata", onScroll, { once: true });
 
     return () => {
       v.removeEventListener("seeked", onSeeked);
       v.removeEventListener("canplay", prime);
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [scrollTargetRef]);
 
   return (
-    <div aria-hidden="true" className="fixed inset-0 -z-10 overflow-hidden bg-[var(--color-ink)]">
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 overflow-hidden bg-[var(--color-ink)]"
+    >
       <video
         ref={ref}
         className="absolute left-1/2 top-1/2 h-auto min-h-full w-auto min-w-full -translate-x-1/2 -translate-y-1/2 object-cover [filter:brightness(0.85)_saturate(1.1)] motion-reduce:hidden"

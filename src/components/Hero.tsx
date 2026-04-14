@@ -2,7 +2,7 @@ export function Hero() {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative flex min-h-screen w-full flex-col items-center"
+      className="absolute inset-0 flex w-full flex-col items-center"
     >
       {/* Wordmark sits on the horizon line of the sunrise (~62% down) */}
       <div className="absolute left-1/2 top-[62vh] w-full -translate-x-1/2 -translate-y-1/2 px-6 text-center">

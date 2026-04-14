@@ -5,6 +5,14 @@ export type ProductCta = {
   href: string;
 };
 
+export type ProductScreenshot = {
+  src: string;
+  alt: string;
+  frame: "browser" | "phone";
+  /** Browser frame only: the domain shown in the fake address bar. */
+  domain?: string;
+};
+
 export type Product = {
   slug: string;
   index: string;
@@ -17,6 +25,7 @@ export type Product = {
   secondaryCta?: ProductCta;
   accent: string;
   metaTags: string[];
+  screenshot?: ProductScreenshot;
 };
 
 export const products: Product[] = [
@@ -35,6 +44,12 @@ export const products: Product[] = [
     },
     accent: "#f6a96a",
     metaTags: ["for ai nerds", "open source", "cloud free for now"],
+    screenshot: {
+      src: "/products/engrams.png",
+      alt: "Engrams web dashboard",
+      frame: "browser",
+      domain: "getengrams.com",
+    },
   },
   {
     slug: "sitter",
@@ -51,5 +66,10 @@ export const products: Product[] = [
     },
     accent: "#f2c88c",
     metaTags: ["for busy parents", "sms-native", "launching soon"],
+    screenshot: {
+      src: "/products/sitter.png",
+      alt: "Sitter SMS conversation",
+      frame: "phone",
+    },
   },
 ];

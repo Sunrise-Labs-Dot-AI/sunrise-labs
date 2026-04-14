@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { Product, ProductStatus } from "@/data/products";
+import { ProductScreenshot } from "./ProductScreenshot";
 
 const statusMeta: Record<ProductStatus, { label: string; filled: boolean }> = {
   public: { label: "live", filled: true },
@@ -78,43 +79,53 @@ export function ProductCard({ product }: { product: Product }) {
         {product.tagline}
       </p>
 
-      {/* Body */}
-      <p className="mt-6 max-w-xl text-base leading-[1.75] text-[var(--color-bone)]/65 md:text-[17px]">
-        {product.description}
-      </p>
+      {/* Two-column body: text on the left, screenshot on the right */}
+      <div className="mt-6 grid gap-12 md:grid-cols-[minmax(0,1fr)_420px] md:items-start md:gap-16">
+        <div>
+          <p className="max-w-xl text-base leading-[1.75] text-[var(--color-bone)]/65 md:text-[17px]">
+            {product.description}
+          </p>
 
-      {/* CTAs as editorial links */}
-      <div className="mt-9 flex flex-wrap items-center gap-x-10 gap-y-4">
-        <a
-          href={product.primaryCta.href}
-          className="editorial-link font-mono text-xs uppercase tracking-[0.2em]"
-          style={{ ["--link-accent" as string]: product.accent }}
-          {...(isExternal(product.primaryCta.href)
-            ? { target: "_blank", rel: "noreferrer" }
-            : {})}
-        >
-          <span aria-hidden="true">→</span>
-          {product.primaryCta.label}
-        </a>
-        {product.secondaryCta ? (
-          <a
-            href={product.secondaryCta.href}
-            className="editorial-link font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-bone)]/70"
-            style={{ ["--link-accent" as string]: "rgba(245,239,226,0.45)" }}
-            {...(isExternal(product.secondaryCta.href)
-              ? { target: "_blank", rel: "noreferrer" }
-              : {})}
-          >
-            <span aria-hidden="true">→</span>
-            {product.secondaryCta.label}
-          </a>
+          {/* CTAs as editorial links */}
+          <div className="mt-9 flex flex-wrap items-center gap-x-10 gap-y-4">
+            <a
+              href={product.primaryCta.href}
+              className="editorial-link font-mono text-xs uppercase tracking-[0.2em]"
+              style={{ ["--link-accent" as string]: product.accent }}
+              {...(isExternal(product.primaryCta.href)
+                ? { target: "_blank", rel: "noreferrer" }
+                : {})}
+            >
+              <span aria-hidden="true">→</span>
+              {product.primaryCta.label}
+            </a>
+            {product.secondaryCta ? (
+              <a
+                href={product.secondaryCta.href}
+                className="editorial-link font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-bone)]/70"
+                style={{ ["--link-accent" as string]: "rgba(245,239,226,0.45)" }}
+                {...(isExternal(product.secondaryCta.href)
+                  ? { target: "_blank", rel: "noreferrer" }
+                  : {})}
+              >
+                <span aria-hidden="true">→</span>
+                {product.secondaryCta.label}
+              </a>
+            ) : null}
+          </div>
+
+          {/* Meta footer */}
+          <footer className="mt-10 font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-fog)]">
+            {product.metaTags.join("  ·  ")}
+          </footer>
+        </div>
+
+        {product.screenshot ? (
+          <div className="md:pt-2">
+            <ProductScreenshot {...product.screenshot} />
+          </div>
         ) : null}
       </div>
-
-      {/* Meta footer */}
-      <footer className="mt-10 font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-fog)]">
-        {product.metaTags.join("  ·  ")}
-      </footer>
 
       {/* Bottom horizon rule */}
       <hr className="horizon-rule mt-14 md:mt-20" />

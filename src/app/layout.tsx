@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Raleway } from "next/font/google";
 import { AtelierMark } from "@/components/AtelierMark";
-import { BackgroundVideo } from "@/components/BackgroundVideo";
 import { DawnCoordinate } from "@/components/DawnCoordinate";
 import { Grain } from "@/components/Grain";
 import "./globals.css";
@@ -59,7 +58,6 @@ export default function RootLayout({
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <BackgroundVideo />
         <Grain />
         <DawnCoordinate />
         <AtelierMark />

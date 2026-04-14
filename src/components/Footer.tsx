@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="relative mx-auto w-full max-w-[720px] px-8 pb-20 pt-6 md:px-0 md:[margin-left:calc(50%-320px+40px)]">
+    <footer className="relative mx-auto w-full max-w-[1040px] px-8 pb-20 pt-6 md:px-10">
       <hr className="horizon-rule mb-10" />
       <div className="flex flex-col items-start gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-fog)]">
         <div>© 2026 SUNRISE LABS</div>

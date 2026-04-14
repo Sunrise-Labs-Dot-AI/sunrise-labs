@@ -1,13 +1,15 @@
 import { Footer } from "@/components/Footer";
-import { Hero } from "@/components/Hero";
 import { Products } from "@/components/Products";
+import { ScrollJackedHero } from "@/components/ScrollJackedHero";
 
 export default function Home() {
   return (
     <main id="main" className="relative z-10">
-      <Hero />
-      <Products />
-      <Footer />
+      <ScrollJackedHero />
+      <section className="relative bg-[var(--color-ink)]">
+        <Products />
+        <Footer />
+      </section>
     </main>
   );
 }
