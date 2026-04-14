@@ -13,6 +13,13 @@ export function Footer() {
           hello@sunriselabs.ai
         </a>
         <a
+          href="/about"
+          className="editorial-link mt-1 normal-case tracking-[0.1em] text-[var(--color-bone)]/60"
+          style={{ ["--link-accent" as string]: "var(--color-horizon)" }}
+        >
+          about
+        </a>
+        <a
           href="/privacy"
           className="editorial-link mt-1 normal-case tracking-[0.1em] text-[var(--color-bone)]/60"
           style={{ ["--link-accent" as string]: "var(--color-horizon)" }}
