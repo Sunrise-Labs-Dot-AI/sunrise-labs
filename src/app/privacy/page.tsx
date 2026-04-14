@@ -11,8 +11,9 @@ export default function PrivacyPage() {
   return (
     <main
       id="main"
-      className="relative z-10 mx-auto w-full max-w-[680px] px-8 pb-32 pt-24 md:px-0 md:pt-32"
+      className="relative z-10 min-h-screen bg-[var(--color-ink)] pb-32 pt-24 md:pt-32"
     >
+      <div className="mx-auto w-full max-w-[680px] px-8 md:px-0">
       <header className="mb-12">
         <div className="mb-6 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-bone)]/60">
           <Link
@@ -129,6 +130,7 @@ export default function PrivacyPage() {
       <footer className="mt-16 font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-fog)]">
         © 2026 Sunrise Labs · a DBA of Heath Foundry, LLC
       </footer>
+      </div>
     </main>
   );
 }
