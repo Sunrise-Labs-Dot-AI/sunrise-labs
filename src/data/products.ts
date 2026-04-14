@@ -6,9 +6,15 @@ export type ProductCta = {
 };
 
 export type ProductScreenshot = {
-  src: string;
   alt: string;
   frame: "browser" | "phone";
+  /** Single image source. Mutually exclusive with `slides`. */
+  src?: string;
+  /**
+   * Multiple image sources, cycled with a cross-fade. Mutually exclusive
+   * with `src`. Phone frame only.
+   */
+  slides?: string[];
   /** Browser frame only: the domain shown in the fake address bar. */
   domain?: string;
 };
@@ -67,9 +73,16 @@ export const products: Product[] = [
     accent: "#f2c88c",
     metaTags: ["for busy parents", "sms-native", "launching soon"],
     screenshot: {
-      src: "/products/sitter.png",
-      alt: "Sitter SMS conversation",
+      alt: "Sitter app screens",
       frame: "phone",
+      slides: [
+        "/products/sitter/booking-detail.png",
+        "/products/sitter/sms-conversation.png",
+        "/products/sitter/new-booking.png",
+        "/products/sitter/sitters.png",
+        "/products/sitter/scenarios.png",
+        "/products/sitter/calendar.png",
+      ],
     },
   },
 ];
