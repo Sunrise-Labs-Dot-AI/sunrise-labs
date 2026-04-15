@@ -61,11 +61,11 @@ export default function AboutPage() {
           <p>
             say hi:{" "}
             <a
-              href="mailto:mornin%27@sunriselabs.ai"
+              href="mailto:mornin@sunriselabs.ai"
               className="editorial-link text-[var(--color-bone)]"
               style={{ ["--link-accent" as string]: "var(--color-horizon)" }}
             >
-              mornin&apos;@sunriselabs.ai
+              mornin@sunriselabs.ai
             </a>
             . that&apos;s me.
           </p>
