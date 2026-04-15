@@ -67,8 +67,8 @@ export const products: Product[] = [
     status: "private-beta",
     statusLabel: "public beta soon",
     primaryCta: {
-      label: "get early access",
-      href: "mailto:hello@sunriselabs.ai?subject=Sitter%20waitlist",
+      label: "join the waitlist",
+      href: "https://trysitter.com/signup",
     },
     accent: "#f2c88c",
     metaTags: ["for busy parents", "sms-native", "launching soon"],
