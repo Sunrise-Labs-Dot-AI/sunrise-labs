@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-ink: #050810;
+  --color-bone: #f5efe2;
+  --color-horizon: #f6a96a;
+  --color-sand: #f2c88c;
+  --color-fog: #8a8a92;
+  --color-hairline: rgba(245, 239, 226, 0.14);
+
+  --color-background: var(--color-ink);
+  --color-foreground: var(--color-bone);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-raleway), var(--font-inter), ui-serif, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+html,
+body {
+  background: transparent;
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Horizon rule — hairline with an amber center flare.
+   Use as a <hr> or a utility on a <div>. */
+.horizon-rule {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  border: 0;
+  background: var(--color-hairline);
+}
+.horizon-rule::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(246, 169, 106, 0.55),
+    transparent
+  );
+}
+
+/* Link with a horizon underline that extends on hover */
+.editorial-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-bone);
+  text-decoration: none;
+}
+.editorial-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: auto;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: var(--link-accent, var(--color-horizon));
+  transform-origin: left;
+  transform: scaleX(0.2);
+  transition: transform 0.4s ease-out;
+}
+.editorial-link:hover::after,
+.editorial-link:focus-visible::after {
+  transform: scaleX(1);
+}
+.editorial-link:focus-visible {
+  outline: none;
+}
+.editorial-link:focus-visible::after {
+  height: 2px;
+}
+
+/* Skip link — hidden until focused */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.75rem 1rem;
+  background: var(--color-ink);
+  color: var(--color-bone);
+  border: 1px solid rgba(245, 239, 226, 0.3);
+  border-radius: 0.25rem;
+  transform: translateY(-120%);
+  transition: transform 0.2s ease;
+  z-index: 100;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.skip-link:focus {
+  transform: translateY(0.5rem);
+  outline: 2px solid var(--color-horizon);
+  outline-offset: 2px;
+}
+
+/* One-shot reveal for cards — applied via IntersectionObserver class swap */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced-motion blanket opt-out */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Fade-in for page load — used by the wordmark and coordinate line */
+@keyframes kindle {
+  0% {
+    opacity: 0;
+    transform: translateY(6%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.kindle {
+  opacity: 0;
+  animation: kindle 2.4s ease-out forwards;
+}
+.kindle-delay-1 {
+  animation-delay: 0.6s;
+}
+.kindle-delay-2 {
+  animation-delay: 1.2s;
+}
+.kindle-delay-3 {
+  animation-delay: 1.8s;
+}
