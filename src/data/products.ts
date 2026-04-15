@@ -61,7 +61,7 @@ export const products: Product[] = [
     slug: "sitter",
     index: "02",
     name: "Sitter",
-    tagline: "Babysitter coordination without the twelve-message group chat.",
+    tagline: "Your sitters, texted in order, until someone says yes.",
     description:
       "Book, confirm, and pay the sitters you already trust — entirely over text. No new app for anyone to download, no accounts for sitters to forget. Launching in public beta soon; get on the list and we'll reach out when it's your turn.",
     status: "private-beta",
