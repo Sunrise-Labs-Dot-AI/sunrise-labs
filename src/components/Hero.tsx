@@ -14,7 +14,7 @@ export function Hero() {
           Sunrise Labs
         </h1>
         <p className="kindle kindle-delay-1 mt-6 font-sans text-sm text-[var(--color-bone)]/75 md:text-base">
-          a tiny studio in San Francisco making things we wished existed.
+          things I wanted to exist, built at weird hours in san francisco.
         </p>
       </div>
 
