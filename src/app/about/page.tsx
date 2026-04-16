@@ -49,8 +49,8 @@ export default function AboutPage() {
 
           <p>
             what&apos;s come out of those hours so far: lodis (a portable
-            memory layer for AI agents) and sitter (an SMS-only way to
-            coordinate babysitters). both started as things I wanted to use
+            memory layer for AI agents), sitter (an SMS-only way to
+            coordinate babysitters), and gauge (an AI-coached fitness app). both started as things I wanted to use
             myself and then turned out to be things other people wanted too.
             neither will be free if it costs me money to run, but I&apos;m
             not building these to flip them — I&apos;m building them to learn
