@@ -85,4 +85,31 @@ export const products: Product[] = [
       ],
     },
   },
+  {
+    slug: "gauge-fitness",
+    index: "03",
+    name: "Gauge",
+    tagline: "An AI coach that actually knows your training.",
+    description:
+      "Gauge tracks your workouts, monitors recovery signals, and adapts your program in real time. The AI coach sees your PRs, readiness, and history — then adjusts volume, intensity, and exercise selection so every session fits how you're showing up that day. Private beta on iOS.",
+    status: "private-beta",
+    primaryCta: {
+      label: "request an invite",
+      href: "mailto:mornin@sunriselabs.ai?subject=Gauge beta invite",
+    },
+    secondaryCta: { label: "learn more", href: "/gauge-fitness" },
+    accent: "#D97706",
+    metaTags: ["for lifters", "ai-coached", "ios private beta"],
+    screenshot: {
+      alt: "Gauge Fitness app screens",
+      frame: "phone",
+      slides: [
+        "/products/gauge/01-dashboard.png",
+        "/products/gauge/02-active-workout.png",
+        "/products/gauge/04-ai-coach.png",
+        "/products/gauge/06-exercise-progression.png",
+        "/products/gauge/07-history.png",
+      ],
+    },
+  },
 ];
