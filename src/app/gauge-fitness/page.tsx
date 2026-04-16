@@ -28,8 +28,8 @@ const featureSections = [
   {
     index: "01",
     title: "Your dashboard knows how you slept",
-    lead: "Recovery-aware training, every morning.",
-    body: "Sleep, HRV, resting heart rate, and step count feed into a daily readiness score. Green means go. Yellow means dial it back. Red means active recovery only. The app auto-adjusts your workout volume and intensity based on the score — no manual overrides needed.",
+    lead: "Sleep and HRV shape the workout before you touch a weight.",
+    body: "Sleep, HRV, resting heart rate, and step count feed into a daily readiness score. Green means go. Yellow means dial it back. Red means active recovery only. Your workout volume and intensity adjust automatically.",
     screenshot: "/products/gauge/01-dashboard.png",
     alt: "Gauge dashboard with readiness score and biosignal trends",
   },
@@ -44,8 +44,8 @@ const featureSections = [
   {
     index: "03",
     title: "A coach that has read every one of your workouts",
-    lead: "Not a chatbot with a personality. A coach with your data.",
-    body: "The AI coach sees your full training history, current program, PRs, readiness, and post-workout feedback. It builds periodized programs, swaps exercises for injuries, adjusts volume mid-cycle, and answers technique questions — all grounded in what you've actually done, not generic templates.",
+    lead: "It has your full history, not a personality.",
+    body: "The AI coach sees your training history, current program, PRs, readiness, and post-workout feedback. It builds periodized programs, swaps exercises for injuries, adjusts volume mid-cycle, and answers technique questions — all grounded in what you've actually done.",
     screenshot: "/products/gauge/04-ai-coach.png",
     alt: "AI coach conversation with personalized training advice",
   },
@@ -78,7 +78,7 @@ const howItWorks = [
     step: "02",
     label: "Get a program built for you",
     detail:
-      "Periodized, equipment-aware, scheduled to your available days. Not a cookie-cutter template.",
+      "Periodized, equipment-aware, scheduled to your available days.",
   },
   {
     step: "03",
@@ -136,10 +136,11 @@ export default function GaugeFitnessPage() {
             </p>
 
             <p className="mt-6 max-w-xl text-base leading-[1.75] text-[var(--color-bone)]/65 md:text-[17px]">
-              Most fitness apps are glorified spreadsheets. Most AI coaches know
-              nothing about you. Gauge is different: it tracks your workouts,
-              reads your recovery signals, and adapts your program in real time.
-              Every session is built for how you&apos;re showing up that day.
+              I built Gauge because I wanted a coach that actually knew what
+              I&apos;d been doing in the gym — not a chatbot with a
+              template. It reads your recovery data every morning, adjusts
+              your program, and logs sets fast enough that your phone stays
+              in your pocket most of the workout.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-x-10 gap-y-4">
@@ -292,11 +293,12 @@ export default function GaugeFitnessPage() {
             className="font-display font-extralight text-[var(--color-bone)] [letter-spacing:0.1em]"
             style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)" }}
           >
-            Want in?
+            Help me test this
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base leading-[1.75] text-[var(--color-bone)]/60">
-            Gauge is free while we build it. Drop a line and
-            we&apos;ll get you on TestFlight.
+            I&apos;m looking for people who lift regularly to try Gauge
+            on TestFlight and tell me what&apos;s broken. It&apos;s free
+            &mdash; you&apos;d be doing me a favor.
           </p>
           <div className="mt-8">
             <a
