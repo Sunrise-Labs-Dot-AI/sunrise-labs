@@ -53,7 +53,7 @@ export default function PrivacyPage() {
             A marketing page describing Sunrise Labs&apos; products. There
             are no user accounts to sign up for, no payment processing, and
             no product functionality running here. Individual products
-            (Engrams, Sitter) have their own sites and their own privacy
+            (Lodis, Sitter) have their own sites and their own privacy
             terms when applicable.
           </p>
         </section>

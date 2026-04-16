@@ -48,7 +48,7 @@ export default function AboutPage() {
           </p>
 
           <p>
-            what&apos;s come out of those hours so far: engrams (a portable
+            what&apos;s come out of those hours so far: lodis (a portable
             memory layer for AI agents) and sitter (an SMS-only way to
             coordinate babysitters). both started as things I wanted to use
             myself and then turned out to be things other people wanted too.

@@ -36,25 +36,25 @@ export type Product = {
 
 export const products: Product[] = [
   {
-    slug: "engrams",
+    slug: "lodis",
     index: "01",
-    name: "Engrams",
+    name: "Lodis",
     tagline: "A memory that travels with you, across every AI tool you use.",
     description:
-      "One portable memory for every AI tool you use. Engrams Local is open-source and runs on your own machine — fully readable, fully yours, free forever. Engrams Cloud is the hosted version for syncing across devices (paid eventually, free for now while we're building it out).",
+      "One portable memory for every AI tool you use. Lodis Local is open-source and runs on your own machine — fully readable, fully yours, free forever. Lodis Cloud is the hosted version for syncing across devices (paid eventually, free for now while we're building it out).",
     status: "public",
-    primaryCta: { label: "getengrams.com", href: "https://getengrams.com" },
+    primaryCta: { label: "lodis.ai", href: "https://lodis.ai" },
     secondaryCta: {
       label: "on github",
-      href: "https://github.com/Sunrise-Labs-Dot-AI/engrams",
+      href: "https://github.com/Sunrise-Labs-Dot-AI/lodis",
     },
     accent: "#f6a96a",
     metaTags: ["for ai nerds", "open source", "cloud free for now"],
     screenshot: {
-      src: "/products/engrams.png",
-      alt: "Engrams web dashboard",
+      src: "/products/lodis.png",
+      alt: "Lodis web dashboard",
       frame: "browser",
-      domain: "getengrams.com",
+      domain: "lodis.ai",
     },
   },
   {

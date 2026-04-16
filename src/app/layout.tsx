@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://sunriselabs.ai"),
   title: "Sunrise Labs",
   description:
-    "A small atelier building opinionated products for people and the agents that help them. Makers of Engrams and Sitter.",
+    "A small atelier building opinionated products for people and the agents that help them. Makers of Lodis and Sitter.",
   openGraph: {
     title: "Sunrise Labs",
     description:
